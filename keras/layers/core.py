@@ -635,6 +635,25 @@ class AutoEncoder(Layer):
                 "output_reconstruction": self.output_reconstruction}
 
 
+class Maxout(Layer):
+    def __init__(self, maxout_unit):
+        self.maxout_unit = maxout_unit
+        self.params = []
+
+    def get_output(self, train=False):
+        X = self.get_input(train)
+        shape = X.shape
+        div = self.maxout_unit
+        if X.ndim == 4:
+            return X.reshape((shape[0], shape[1] // div, div, shape[2], shape[3])).max(axis=2)
+        elif X.ndim == 2:
+            return X.reshape((shape[0], shape[1] // div, div)).max(axis=2)
+
+    def get_config(self):
+        return {"name": self.__class__.__name__,
+                'maxout_unit': self.maxout_unit}
+
+
 class MaxoutDense(Layer):
     '''
         Max-out layer, nb_feature is the number of pieces in the piecewise linear approx.
